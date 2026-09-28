@@ -464,14 +464,3 @@ if __name__=="__main__":
     #plot_comparison_all(what_vals,lhat_vals,doL_vals)
     #plot_full_figs(what_vals,lhat_vals[:1],doL_vals[-1:])
     plot_full_figs(what_vals,lhat_vals,doL_vals)
-
-    if False:
-        plot_near_SOL(what_arr,doL=0.1)
-        plot_far_SOL(what_arr,doL=0.1)
-        plot_TdF_vs_TuN(what_arr,doL=0.1)
-        plot_coll(what_arr,doL=0.1)
-        plot_nvt(what_arr,doL=0.1)
-        plot_pressure(what_arr,doL=0.1)
-        plot_wall_flux(what_arr,doL=0.1)
-        plot_heat_fluxes(what_arr,doL=0.1)
-    #plot_doL_scan()
