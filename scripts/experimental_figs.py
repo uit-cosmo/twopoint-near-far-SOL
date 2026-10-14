@@ -339,9 +339,11 @@ class Plot:
                 cosmoplots.change_log_axis_base(ax[ind],'both')
                 for styleind, wk in enumerate(self.what_ind):
                     plot(ax[ind], C(wk,li,dj),(good(self.TdF/self.TuN,wk,li,dj)), 'C0',styleind)
+                    plot(ax[ind], C(wk,li,dj),(good(self.TdF,wk,li,dj)), 'C1',styleind)
                 plot(ax[ind], nuref[nuref<5], 0.2*nuref[nuref<5]**(0.6), 'k',styleind)
                 plot(ax[ind], nuref[nuref>10], 0.4*nuref[nuref>10]**(0.2), 'k',styleind)
                 plot(ax[ind], nuref[nuref>10], 0.3*nuref[nuref>10]**(0.4), 'k',styleind)
+                plot(ax[ind], nuref, 0.5*nuref**(2/21), 'grey',styleind)
                     #plot(ax[ind], C(wk,li,dj), (good(self.TdF,wk,li,dj)), 'C1',styleind)
                     #plt.axhline(2.5/self.ghat, c='k', ls='-.')
                 ax[ind].text(0.2, 0.4, r'$\nu_\mathrm{ref}^{0.6}$', transform = ax[ind].transAxes)
