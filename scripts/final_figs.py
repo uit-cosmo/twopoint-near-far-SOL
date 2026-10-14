@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.lines as mlines
 import cosmoplots
+import cmasher as cmr
 plt.style.use(["cosmoplots.default"])
 from twopointfilaments import xi_factor
 
@@ -14,6 +15,11 @@ linestyle = ['--', ':']
 symbstyle = ['v','^']
 lhat_name = {1.0: '1', 2.0: '2'}
 dhat_name = {0.1: '1/10', 0.2: '1/5'}
+
+def cmap(n,M=4):
+    # set the default M to the number of lines to plot
+    tmp = cmr.tropical.resampled(M)
+    return tmp(n/M)
 
 class Plot:
     """
@@ -156,14 +162,14 @@ class Plot:
             for dj in range(len(self.doL)):
                 ind = li + len(self.lhat)*dj
                 cosmoplots.change_log_axis_base(ax[ind],'y')
-                ax[ind].plot(self.coll, self.standard_twopoint['ndN'], 'C0', label = r'$n_\mathrm{d,N}/n_\mathrm{u,N}$')
-                ax[ind].plot(self.coll, self.standard_twopoint['TdN']/self.standard_twopoint['TuN'], 'C1', label = r'$T_\mathrm{d,N}/T_\mathrm{u,N}$')
-                ax[ind].plot(self.coll, self.standard_twopoint['TuN'], 'C2', label = r'$T_\mathrm{u,N}/T_\mathrm{ref}$')
+                ax[ind].plot(self.coll, self.standard_twopoint['ndN'], c=cmap(0), label = r'$n_\mathrm{d,N}/n_\mathrm{u,N}$')
+                ax[ind].plot(self.coll, self.standard_twopoint['TdN']/self.standard_twopoint['TuN'], c=cmap(1), label = r'$T_\mathrm{d,N}/T_\mathrm{u,N}$')
+                ax[ind].plot(self.coll, self.standard_twopoint['TuN'], c=cmap(2), label = r'$T_\mathrm{u,N}/T_\mathrm{ref}$')
 
                 for styleind, wk in enumerate(self.what_ind):
-                    plot(ax[ind], C(wk,li,dj), good(self.ndN,wk,li,dj), 'C0', styleind)
-                    plot(ax[ind], C(wk,li,dj), good(self.TdN/self.TuN,wk,li,dj), 'C1', styleind)
-                    plot(ax[ind], C(wk,li,dj), good(self.TuN,wk,li,dj), 'C2', styleind)
+                    plot(ax[ind], C(wk,li,dj), good(self.ndN,wk,li,dj), cmap(0), styleind)
+                    plot(ax[ind], C(wk,li,dj), good(self.TdN/self.TuN,wk,li,dj), cmap(1), styleind)
+                    plot(ax[ind], C(wk,li,dj), good(self.TuN,wk,li,dj), cmap(2), styleind)
                     
                 ldlab = rf'$\hat{{\lambda}}= {lhat_name[self.lhat[li]]},\, \hat{{\delta}}= {dhat_name[self.doL[dj]]}$'
                 ax[ind].text(0.62, 0.1, ldlab, bbox={'facecolor':'white'},
@@ -185,10 +191,10 @@ class Plot:
                 ind = li + len(self.lhat)*dj
                 cosmoplots.change_log_axis_base(ax[ind],'y')
                 for styleind, wk in enumerate(self.what_ind):
-                    plot(ax[ind], C(wk,li,dj), (good(self.ndF/self.nuF,wk,li,dj)), 'C0',styleind)
-                    plot(ax[ind], C(wk,li,dj), (good(self.TdF/self.TuF,wk,li,dj)), 'C1',styleind)
-                    #plt.plot(Data['coll'], Data['TuF']/Data['TuN'], 'C2'+ls)
-                    #plt.plot(Data['coll'], Data['nuF'], 'C3'+ls)
+                    plot(ax[ind], C(wk,li,dj), (good(self.ndF/self.nuF,wk,li,dj)), cmap(0),styleind)
+                    plot(ax[ind], C(wk,li,dj), (good(self.TdF/self.TuF,wk,li,dj)), cmap(1),styleind)
+                    #plt.plot(Data['coll'], Data['TuF']/Data['TuN'], cmap(2)+ls)
+                    #plt.plot(Data['coll'], Data['nuF'], cmap(3)+ls)
 
                 ldlab = rf'$\hat{{\lambda}}= {lhat_name[self.lhat[li]]},\, \hat{{\delta}}= {dhat_name[self.doL[dj]]}$'
                 ax[ind].text(0.65, 0.1, ldlab, bbox={'facecolor':'white'},
@@ -199,10 +205,10 @@ class Plot:
 
                 ax[ind].set_xlim(self.coll[0],self.coll[-1])
                 #ax[ind].set_ylim(0,10)
-                lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$n_\mathrm{d,F}/n_\mathrm{u,F}$'),
-                         mlines.Line2D([], [], color='C1', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,F}$')]
-                         #mlines.Line2D([], [], color='C2', ls = '-', label=r'$T_\mathrm{u,F}/T_\mathrm{u,N}$'),
-                         #mlines.Line2D([], [], color='C3', ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$')]
+                lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$n_\mathrm{d,F}/n_\mathrm{u,F}$'),
+                         mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,F}$')]
+                         #mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$T_\mathrm{u,F}/T_\mathrm{u,N}$'),
+                         #mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$')]
                 ax[ind].legend(handles=lines)
 
         fig.savefig(saveloc+'far'+fname+'_compare.eps')
@@ -219,65 +225,65 @@ class Plot:
                          transform = ax[i].transAxes)
 
         # Near-SOL
-        ax[0].plot(self.coll, self.standard_twopoint['ndN'], 'C0', label = r'$n_\mathrm{d,N}/n_\mathrm{u,N}$')
-        ax[0].plot(self.coll, self.standard_twopoint['TdN']/self.standard_twopoint['TuN'], 'C1', label = r'$T_\mathrm{d,N}/T_\mathrm{u,N}$')
-        ax[0].plot(self.coll, self.standard_twopoint['TuN'], 'C2', label = r'$T_\mathrm{u,N}/T_\mathrm{ref}$')
+        ax[0].plot(self.coll, self.standard_twopoint['ndN'], c=cmap(0), label = r'$n_\mathrm{d,N}/n_\mathrm{u,N}$')
+        ax[0].plot(self.coll, self.standard_twopoint['TdN']/self.standard_twopoint['TuN'], c=cmap(1), label = r'$T_\mathrm{d,N}/T_\mathrm{u,N}$')
+        ax[0].plot(self.coll, self.standard_twopoint['TuN'], c=cmap(2), label = r'$T_\mathrm{u,N}/T_\mathrm{ref}$')
 
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax[0], C(wk,0,0), good(self.ndN,wk,0,0), 'C0', styleind)
-            plot(ax[0], C(wk,0,0), good(self.TdN/self.TuN,wk,0,0), 'C1', styleind)
-            plot(ax[0], C(wk,0,0), good(self.TuN,wk,0,0), 'C2', styleind)
+            plot(ax[0], C(wk,0,0), good(self.ndN,wk,0,0), cmap(0), styleind)
+            plot(ax[0], C(wk,0,0), good(self.TdN/self.TuN,wk,0,0), cmap(1), styleind)
+            plot(ax[0], C(wk,0,0), good(self.TuN,wk,0,0), cmap(2), styleind)
             
         ax[0].set_ylim(1e-3,1e3)
         ax[0].legend(loc=3)
 
         # Far-SOL
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax[1], C(wk,0,0), (good(self.ndF/self.nuF,wk,0,0)), 'C0',styleind)
-            plot(ax[1], C(wk,0,0), (good(self.TdF/self.TuF,wk,0,0)), 'C1',styleind)
-            #plot(ax[1], C(wk,0,0), (good(self.nuF,wk,0,0)), 'C2',styleind)
-            #plot(ax[1], C(wk,0,0), (good(self.TuF,wk,0,0)), 'C3',styleind)
+            plot(ax[1], C(wk,0,0), (good(self.ndF/self.nuF,wk,0,0)), cmap(0),styleind)
+            plot(ax[1], C(wk,0,0), (good(self.TdF/self.TuF,wk,0,0)), cmap(1),styleind)
+            #plot(ax[1], C(wk,0,0), (good(self.nuF,wk,0,0)), cmap(2),styleind)
+            #plot(ax[1], C(wk,0,0), (good(self.TuF,wk,0,0)), cmap(3),styleind)
 
-        lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$n_\mathrm{d,F}/n_\mathrm{u,F}$'),
-                 mlines.Line2D([], [], color='C1', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,F}$')]
-                 #mlines.Line2D([], [], color='C2', ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$'),
-                 #mlines.Line2D([], [], color='C3', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{ref}$')]
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$n_\mathrm{d,F}/n_\mathrm{u,F}$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,F}$')]
+                 #mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$'),
+                 #mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{ref}$')]
         ax[1].legend(handles=lines)
         ax[1].set_ylim(1e-3,1e3)
 
         # Pressure
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax[2], C(wk,0,0), (good(self.TuN,wk,0,0)), 'C0',styleind)
-            plot(ax[2], C(wk,0,0), (good(self.nuF*self.TuF,wk,0,0)), 'C1',styleind)
+            plot(ax[2], C(wk,0,0), (good(self.TuN,wk,0,0)), cmap(0),styleind)
+            plot(ax[2], C(wk,0,0), (good(self.nuF*self.TuF,wk,0,0)), cmap(1),styleind)
 
         ax[2].set_xlabel(r'$\nu_{\mathrm{ref}}$')
         ax[2].set_ylabel(r'$n T / n_\mathrm{u,N} T_\mathrm{ref}$')
 
-        lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$n_\mathrm{u,N} T_\mathrm{u,N}$'),
-                 mlines.Line2D([], [], color='C1', ls = '-', label=r'$n_\mathrm{u,F} T_\mathrm{u,F}$')]
-                 #mlines.Line2D([], [], color='C2', ls = '-', label=r'$T_\mathrm{u,F}/T_\mathrm{u,N}$'),
-                 #mlines.Line2D([], [], color='C3', ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$')]
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$n_\mathrm{u,N} T_\mathrm{u,N}$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$n_\mathrm{u,F} T_\mathrm{u,F}$')]
+                 #mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$T_\mathrm{u,F}/T_\mathrm{u,N}$'),
+                 #mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$n_\mathrm{u,F}/n_\mathrm{u,N}$')]
         ax[2].legend(handles=lines)
 
         fig.savefig(saveloc+'near_far_p'+fname+'.eps')
 
     def plot_coll(self,what_uF=True):
         fig, ax = plt.subplots()
-        lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$\mathrm{u,N}$'),
-                 mlines.Line2D([], [], color='C1', ls = '-', label=r'$\mathrm{d,N}$'),
-                 mlines.Line2D([], [], color='C2', ls = '-', label=r'$\mathrm{u,F}$'),
-                 mlines.Line2D([], [], color='C3', ls = '-', label=r'$\mathrm{d,F}$'),
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$\mathrm{u,N}$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$\mathrm{d,N}$'),
+                 mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$\mathrm{u,F}$'),
+                 mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$\mathrm{d,F}$'),
                  mlines.Line2D([], [], color='k', ls = '-', label=r'$\mathrm{ref}$')]
         C, good, plot, fname = self._get_plot_params(what_uF)
         cosmoplots.change_log_axis_base(ax,'y')
         ax.plot(self.coll, self.coll, 'k')
-        #ax.plot(self.coll, self.coll/self.standard_twopoint['TuN']**2, 'C0')
-        #ax.plot(self.coll, self.coll*self.standard_twopoint['ndN']/self.standard_twopoint['TdN']**2, 'C1')
+        #ax.plot(self.coll, self.coll/self.standard_twopoint['TuN']**2, cmap(0))
+        #ax.plot(self.coll, self.coll*self.standard_twopoint['ndN']/self.standard_twopoint['TdN']**2, cmap(1))
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax, C(wk,0,0), (C(wk,0,0)*good(1./self.TuN**2,wk,0,0)), 'C0',styleind)
-            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.ndN/self.TdN**2,wk,0,0)), 'C1',styleind)
-            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.nuF/self.TuF**2,wk,0,0)), 'C2',styleind)
-            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.ndF/self.TdF**2,wk,0,0)), 'C3',styleind)
+            plot(ax, C(wk,0,0), (C(wk,0,0)*good(1./self.TuN**2,wk,0,0)), cmap(0),styleind)
+            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.ndN/self.TdN**2,wk,0,0)), cmap(1),styleind)
+            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.nuF/self.TuF**2,wk,0,0)), cmap(2),styleind)
+            plot(ax, C(wk,0,0), (C(wk,0,0)*good(self.ndF/self.TdF**2,wk,0,0)), cmap(3),styleind)
 
         ax.set_xlabel(r'$\nu_{\mathrm{ref}}$')
         ax.set_ylabel(r'$\nu_*$')
@@ -293,126 +299,61 @@ class Plot:
         C, good, plot, fname = self._get_plot_params(what_uF)
         cosmoplots.change_log_axis_base(ax,'y')
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax, C(wk,0,0), (1+self.lhat[0]**(-1))*self.W(wk,0,0)*(good(self.nuF,wk,0,0)), 'C0',styleind)
-            plot(ax, C(wk,0,0), 2.5*(1+self.lhat[0]**(-1))*self.W(wk,0,0)*(self.xi_factor*C(wk,0,0)*good(self.nuF*self.TuF,wk,0,0)), 'C1',styleind)
-            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndF*self.TdF**1.5,wk,0,0), 'C2',styleind)
-            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndN*self.TdN**1.5,wk,0,0), 'C3',styleind)
+            plot(ax, C(wk,0,0), (1+self.lhat[0]**(-1))*self.W(wk,0,0)*(good(self.nuF,wk,0,0)), cmap(0),styleind)
+            plot(ax, C(wk,0,0), 2.5*(1+self.lhat[0]**(-1))*self.W(wk,0,0)*(self.xi_factor*C(wk,0,0)*good(self.nuF*self.TuF,wk,0,0)), cmap(1),styleind)
+            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndF*self.TdF**1.5,wk,0,0), cmap(2),styleind)
+            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndN*self.TdN**1.5,wk,0,0), cmap(3),styleind)
 
         ax.set_xlabel(r'$\nu_{\mathrm{ref}}$')
 
         ax.set_xlim(self.coll[0],60)
         ax.set_ylim(1e-2,20)
-        lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$S_{F}(0)$'),
-                 mlines.Line2D([], [], color='C1', ls = '-', label=r'$Q_{F}(0)$'),
-                 mlines.Line2D([], [], color='C2', ls = '-', label=r'$q_{\parallel,F}(1)$'),
-                 mlines.Line2D([], [], color='C3', ls = '-', label=r'$q_{\parallel,N}(1)$')]
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$S_{F}(0)$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$Q_{F}(0)$'),
+                 mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$q_{\parallel,F}(1)$'),
+                 mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$q_{\parallel,N}(1)$')]
         ax.legend(handles=lines,ncols=2)
 
         fig.savefig(saveloc+'fluxes'+fname+'.eps')
 
-    def plot_TdF_vs_TuN(self, what_uF=False):
-        fig, ax = cosmoplots.figure_multiple_rows_columns(len(self.doL),len(self.lhat))
-        C, good, plot, fname = self._get_plot_params(what_uF)
-        nuref = 10**np.linspace(-1,2,20)
-        for li in range(len(self.lhat)):
-            for dj in range(len(self.doL)):
-                ind = li + len(self.lhat)*dj
-                cosmoplots.change_log_axis_base(ax[ind],'both')
-                for styleind, wk in enumerate(self.what_ind):
-                    plot(ax[ind], C(wk,li,dj),(good(self.TdF/self.TuN,wk,li,dj)), 'C0',styleind)
-                plot(ax[ind], nuref[nuref<5], 0.2*nuref[nuref<5]**(0.6), 'k',styleind)
-                plot(ax[ind], nuref[nuref>10], 0.4*nuref[nuref>10]**(0.2), 'k',styleind)
-                plot(ax[ind], nuref[nuref>10], 0.3*nuref[nuref>10]**(0.4), 'k',styleind)
-                    #plot(ax[ind], C(wk,li,dj), (good(self.TdF,wk,li,dj)), 'C1',styleind)
-                    #plt.axhline(2.5/self.ghat, c='k', ls='-.')
-                ax[ind].text(0.2, 0.4, r'$\nu_\mathrm{ref}^{0.6}$', transform = ax[ind].transAxes)
-                ax[ind].text(0.8, 0.6, r'$\nu_\mathrm{ref}^{0.2}$', transform = ax[ind].transAxes)
-                ax[ind].text(0.6, 0.8, r'$\nu_\mathrm{ref}^{0.4}$', transform = ax[ind].transAxes)
-
-                ax[ind].set_xlabel(r'$\nu_{\mathrm{ref}}$')
-                ax[ind].set_ylabel(r'$T_\mathrm{d,F}/T_\mathrm{u,N}$')
-
-                    #ax[ind].set_xlim(self.coll[0],self.coll[-1])
-                    #ax[ind].set_ylim()
-                lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,N}$'),
-                         mlines.Line2D([], [], color='C1', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{ref}$'),
-                         mlines.Line2D([], [], color='k', ls = '-.', label=r'$5 /(2 \hat{\gamma}\xi)$')]
-                #ax[ind].legend(handles=lines)
-
-        fig.savefig(saveloc+'TdF_v_TuN'+fname+'.eps')
-
-    def plot_nvt(self, what_uF=False):
+    def plot_nvt(self, what_uF=True):
         fig, ax = plt.subplots()
         C, good, plot, fname = self._get_plot_params(what_uF)
-        n = 10**np.linspace(-1,5,100)
-        ax.loglog(n, n**(-0.68),'k-.')
+        n = 10**np.linspace(-1,6,100)
+        cosmoplots.change_log_axis_base(ax,'both')
+        ax.plot(n, n**(-0.68),'k-')
+        ax.text(0.66, 0.45, r'$(\nu_\mathrm{ref} n_\mathrm{d,N})^{-0.68}$', transform = ax.transAxes)
+        lines = []
         for li in range(len(self.lhat)):
             for dj in range(len(self.doL)):
                 ind = li + len(self.lhat)*dj
+                lines.append(mlines.Line2D([], [], color=cmap(ind), ls = '-', label=rf'$\hat{{\lambda}}={lhat_name[self.lhat[li]]},\, \hat{{\delta}}={dhat_name[self.doL[dj]]}$'))
                 for styleind, wk in enumerate(self.what_ind):
-                    plot(ax, (C(wk,li,dj)*good(self.ndN,wk,li,dj)), (good(self.TdN,wk,li,dj)), f'C{ind}',styleind)
-                    plot(ax, (C(wk,li,dj)*good(self.ndN,wk,li,dj)), (good(self.TdN,wk,li,dj)), f'C{ind}',styleind)
-                    #plot(ax[ind], C(wk,li,dj), (good(self.TdF,wk,li,dj)), 'C1',styleind)
-                    #plt.axhline(2.5/self.ghat, c='k', ls='-.')
+                    plot(ax, (C(wk,li,dj)*good(self.ndN,wk,li,dj)), (good(self.TdN,wk,li,dj)), cmap(ind),styleind)
+                    plot(ax, (C(wk,li,dj)*good(self.ndN,wk,li,dj)), (good(self.TdN,wk,li,dj)), cmap(ind),styleind)
         ax.set_xlabel(r'$\nu_\mathrm{ref} n_\mathrm{d,N}$')
         ax.set_ylabel(r'$T_\mathrm{d,N}$')
+        ax.legend(handles=lines)
 
-                    #ax[ind].set_xlim(self.coll[0],self.coll[-1])
-                    #ax[ind].set_ylim()
+        #ax.set_xlim(self.coll[0],60)
 
         fig.savefig(saveloc+'nvt'+fname+'.eps')
-
-    def plot_TdF_vs_TuN(self, what_uF=False):
-        fig, ax = cosmoplots.figure_multiple_rows_columns(len(self.doL),len(self.lhat))
-        C, good, plot, fname = self._get_plot_params(what_uF)
-        nuref = 10**np.linspace(-1,2,20)
-        for li in range(len(self.lhat)):
-            for dj in range(len(self.doL)):
-                ind = li + len(self.lhat)*dj
-                cosmoplots.change_log_axis_base(ax[ind],'both')
-                for styleind, wk in enumerate(self.what_ind):
-                    plot(ax[ind], C(wk,li,dj),(good(self.TdF/self.TuN,wk,li,dj)), 'C0',styleind)
-                    plot(ax[ind], C(wk,li,dj),(good(self.TdF,wk,li,dj)), 'C1',styleind)
-                plot(ax[ind], nuref[nuref<5], 0.2*nuref[nuref<5]**(0.6), 'k',styleind)
-                plot(ax[ind], nuref[nuref>10], 0.4*nuref[nuref>10]**(0.2), 'k',styleind)
-                plot(ax[ind], nuref[nuref>10], 0.3*nuref[nuref>10]**(0.4), 'k',styleind)
-                plot(ax[ind], nuref, 0.5*nuref**(2/21), 'grey',styleind)
-                    #plot(ax[ind], C(wk,li,dj), (good(self.TdF,wk,li,dj)), 'C1',styleind)
-                    #plt.axhline(2.5/self.ghat, c='k', ls='-.')
-                ax[ind].text(0.2, 0.4, r'$\nu_\mathrm{ref}^{0.6}$', transform = ax[ind].transAxes)
-                ax[ind].text(0.8, 0.6, r'$\nu_\mathrm{ref}^{0.2}$', transform = ax[ind].transAxes)
-                ax[ind].text(0.6, 0.8, r'$\nu_\mathrm{ref}^{0.4}$', transform = ax[ind].transAxes)
-
-                ax[ind].set_xlabel(r'$\nu_{\mathrm{ref}}$')
-                ax[ind].set_ylabel(r'$T_\mathrm{d,F}/T_\mathrm{u,N}$')
-
-                    #ax[ind].set_xlim(self.coll[0],self.coll[-1])
-                    #ax[ind].set_ylim()
-                lines = [mlines.Line2D([], [], color='C0', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{u,N}$'),
-                         mlines.Line2D([], [], color='C1', ls = '-', label=r'$T_\mathrm{d,F}/T_\mathrm{ref}$'),
-                         mlines.Line2D([], [], color='k', ls = '-.', label=r'$5 /(2 \hat{\gamma}\xi)$')]
-                #ax[ind].legend(handles=lines)
-
-        fig.savefig(saveloc+'TdF_v_TuN'+fname+'.eps')
 
 if __name__=="__main__":
     what_vals = [0.2, 1.]
     lhat_vals = [1., 2.]
     doL_vals = [0.1,0.2]
     # Plot comparison figures
-    if False:
-        P = Plot(lhat_vals=lhat_vals, doL_vals=doL_vals)
-        P.find_what_uF_indices(what_vals=what_vals)
-        P.plot_good_params()
-        P.plot_near_SOL_compare()
-        P.plot_far_SOL_compare()
+    P = Plot(lhat_vals=lhat_vals, doL_vals=doL_vals)
+    P.find_what_uF_indices(what_vals=what_vals)
+    P.plot_good_params()
+    P.plot_near_SOL_compare()
+    P.plot_far_SOL_compare()
+    P.plot_nvt()
+
     # Plot only lhat=1, dhat=0.2
-    if True:
-        Q = Plot(lhat_vals=lhat_vals[:1], doL_vals=doL_vals[-1:])
-        Q.find_what_uF_indices(what_vals=what_vals)
-        Q.plot_near_far_pressure()
-        Q.plot_coll()
-        Q.plot_fluxes()
-    if False:
-        Q.plot_nvt()
-        Q.plot_TdF_vs_TuN(what_uF=True)
+    Q = Plot(lhat_vals=lhat_vals[:1], doL_vals=doL_vals[-1:])
+    Q.find_what_uF_indices(what_vals=what_vals)
+    Q.plot_near_far_pressure()
+    Q.plot_coll()
+    Q.plot_fluxes()
