@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.integrate import solve_ivp
 from twopointfilaments import constants, TwoPoint
 import mpmath as mp
 import warnings
@@ -113,28 +112,3 @@ class TBTPW:
         assert (self.nuF<1), ('Far-SOL upstream density is higher than near-SOL', -6)
         self.TuF = 2*self.ndF*self.TdF/self.nuF
         assert (self.TuN>self.nuF*self.TuF/self.lhat), ('Far-SOL heat source is negative.',-7)
-
-    def get_far_sol_profiles(self, xpoints=100):
-        """
-        Likely bad. 
-        """
-        assert self.what>0, "No far SOL for chosen parameters"
-        X = np.linspace(0,1,xpoints)[::-1]
-
-        def f(x):
-            return (1-np.exp(-x/self.doL))/(1-np.exp(-1./self.doL))
-        def M2(x,T):
-            # T is T(x,F)/TdF
-            return (1-(1-T*f(x)**2)**0.5)/(1+(1-T*f(x)**2)**0.5)
-            
-        def diffq(x,T):
-            c = 2*self.xi*self.ndF / (7*self.TdF**2)
-            return c*T**(-2.5)*f(x) * (0.5*T*(5+M2(x,T)) - self.ghat)
-            
-        res=solve_ivp(diffq, [1.,0.], [1.,], t_eval=X)
-        print(res)
-        T = res.y[0,:]*self.TdF
-        M = np.sqrt(M2(X,res.y[0,:]))
-        n = 2*self.ndF/(res.y[0,:]*(M2(X,res.y[0,:])+1))
-
-        return X, n, M, T
