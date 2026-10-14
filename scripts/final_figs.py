@@ -295,24 +295,47 @@ class Plot:
         fig.savefig(saveloc+'coll'+fname+'.eps')
 
     def plot_fluxes(self, what_uF=True):
-        fig, ax = plt.subplots()
+        fig, ax = cosmoplots.figure_multiple_rows_columns(1,2)
         C, good, plot, fname = self._get_plot_params(what_uF)
-        cosmoplots.change_log_axis_base(ax,'y')
+        cosmoplots.change_log_axis_base(ax[0],'y')
         for styleind, wk in enumerate(self.what_ind):
-            plot(ax, C(wk,0,0), (1+self.lhat[0]**(-1))*self.W(wk,0,0)*(good(self.nuF,wk,0,0)), cmap(0),styleind)
-            plot(ax, C(wk,0,0), 2.5*(1+self.lhat[0]**(-1))*self.W(wk,0,0)*(self.xi_factor*C(wk,0,0)*good(self.nuF*self.TuF,wk,0,0)), cmap(1),styleind)
-            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndF*self.TdF**1.5,wk,0,0), cmap(2),styleind)
-            plot(ax, C(wk,0,0), self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndN*self.TdN**1.5,wk,0,0), cmap(3),styleind)
+            SF_int = self.doL[0]*(1+self.lhat[0]**(-1))*self.W(wk,0,0)*(1-np.exp(-1./self.doL[0]))*(good(self.nuF,wk,0,0))
+            #SN_int = self.doL[0]*(1+self.lhat[0])*self.W(wk,0,0)*(1-np.exp(-1./self.doL[0]))
+            G1 = good(self.ndF*np.sqrt(self.TdF),wk,0,0)
 
-        ax.set_xlabel(r'$\nu_{\mathrm{ref}}$')
+            plot(ax[0], C(wk,0,0), SF_int, cmap(0),styleind)
+            #plot(ax[0], C(wk,0,0), SN_int, cmap(1),styleind)
+            plot(ax[0], C(wk,0,0), G1, cmap(1),styleind)
 
-        ax.set_xlim(self.coll[0],60)
-        ax.set_ylim(1e-2,20)
-        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$S_{F}(0)$'),
-                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$Q_{F}(0)$'),
-                 mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$q_{\parallel,F}(1)$'),
-                 mlines.Line2D([], [], color=cmap(3), ls = '-', label=r'$q_{\parallel,N}(1)$')]
-        ax.legend(handles=lines,ncols=2)
+        ax[0].set_xlabel(r'$\nu_{\mathrm{ref}}$')
+        ax[0].set_ylabel(r'$\Gamma_\mathrm{tot}$')
+        ax[0].set_xlim(self.coll[0],60)
+        #ax[0].set_ylim(1e-2,20)
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$\int_0^1 S_{F}(x)\mathrm{d}x$'),
+                 #mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$\int_0^1 S_{N}(x)\mathrm{d}x$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$n_\mathrm{d,F} \sqrt{T_\mathrm{d,F}}$')]
+        ax[0].legend(handles=lines)
+
+        for styleind, wk in enumerate(self.what_ind):
+            QF_int = self.doL[0]*(1-np.exp(-1./self.doL[0]))*2.5*(1+self.lhat[0]**(-1))*self.W(wk,0,0)*(self.xi_factor*C(wk,0,0)*good(self.nuF*self.TuF,wk,0,0))
+            #QN_int = self.doL[0]*(1-np.exp(-1./self.doL[0]))*2.5*(1+self.lhat[0])*self.W(wk,0,0)*(self.xi_factor*C(wk,0,0)*good(self.TuN,wk,0,0))
+            qparF = self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndF*self.TdF**1.5,wk,0,0)
+            qparN = self.ghat*self.xi_factor*C(wk,0,0)*good(self.ndN*self.TdN**1.5,wk,0,0)
+            plot(ax[1], C(wk,0,0), QF_int, cmap(0),styleind)
+            #plot(ax, C(wk,0,0), QN_int, cmap(1),styleind)
+            plot(ax[1], C(wk,0,0), qparF, cmap(1),styleind)
+            plot(ax[1], C(wk,0,0), qparN, cmap(2),styleind)
+
+        ax[1].set_xlabel(r'$\nu_{\mathrm{ref}}$')
+        ax[1].set_ylabel(r'$q_{\mathrm{tot}}$')
+
+        ax[1].set_xlim(self.coll[0],60)
+        ax[1].set_ylim(0,1)
+        lines = [mlines.Line2D([], [], color=cmap(0), ls = '-', label=r'$\int_0^1 Q_{F}(x)\mathrm{d}x$'),
+                 #mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$\int_0^1 Q_{N}(x)\mathrm{d}x$'),
+                 mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$q_{\parallel,\mathrm{F}}(1)$'),
+                 mlines.Line2D([], [], color=cmap(2), ls = '-', label=r'$q_{\parallel,\mathrm{N}}(1)$')]
+        ax[1].legend(handles=lines,ncols=3,handlelength=1,handletextpad=0.5)
 
         fig.savefig(saveloc+'fluxes'+fname+'.eps')
 
