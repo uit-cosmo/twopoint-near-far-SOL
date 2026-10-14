@@ -1,7 +1,6 @@
 # twopointfilaments
-Supporting code for the two-point model for filaments
+Supporting code for the manuscript "A two-point model for the near-SOL and far-SOL"
 
-## Two-box two-point model with wall fluxes
-This makes the data used in the PSI 2026 contribution. 
+An earlier version of these results was presented at PSI 2026.
 
 To recreate, first run `scripts/make_data.py` then `scripts/final_figs.py`.
