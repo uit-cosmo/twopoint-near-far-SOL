@@ -11,8 +11,8 @@ dataloc='/home/ath019/Documents/manuscripts/two-point/code/data/'
 saveloc='/home/ath019/Documents/manuscripts/two-point/code/figures/'
 
 # Linestyle for plotting wrt what
-linestyle = ['--', ':']
-symbstyle = ['v','^']
+linestyle = ['--', ':','-']
+symbstyle = ['v','^','<','>']
 lhat_name = {1.0: '1', 2.0: '2'}
 dhat_name = {0.1: '1/10', 0.2: '1/5'}
 
@@ -362,21 +362,93 @@ class Plot:
 
         fig.savefig(saveloc+'nvt'+fname+'.eps')
 
+    def plot_coll_lhat_doL_scan(self):
+        # Only for what_uF = 1
+        fig, ax = plt.subplots()
+        good = lambda data, li, dj: data[:,:,li,dj][self.what_uF_good_ind[self.what_ind[0]][:,:,li,dj]]
+        C = lambda li, dj: self.C(self.what_ind[0],li,dj)
+
+        cosmoplots.change_log_axis_base(ax,'y')
+        plt.axhline(1,c='grey',ls=':')
+        lines = []
+        for li in range(len(self.lhat)):
+            for dj in range(len(self.doL)):
+                ind = li + len(self.lhat)*dj
+                lines.append(mlines.Line2D([], [], color=cmap(ind), ls = '-', label=rf'$\hat{{\lambda}}={lhat_name[self.lhat[li]]},\, \hat{{\delta}}={dhat_name[self.doL[dj]]}$'))
+                ax.plot(C(li,dj), good(self.ndN*self.TuN**2/self.TdN**2,li,dj),color=cmap(ind), ls='-')
+                ax.plot(C(li,dj), good(self.ndF*self.TuF**2/(self.nuF*self.TdF**2),li,dj), color=cmap(ind),ls='--')
+        ax.set_xlabel(r'$\nu_\mathrm{ref}$')
+        ax.set_ylabel(r'$\nu_\mathrm{d}/\nu_\mathrm{u}$')
+        ax.legend(handles=lines,ncols=2)
+
+        ax.set_xlim(self.coll[0],30)
+        ax.set_ylim(1e-5,1e9)
+
+        fig.savefig(saveloc+'coll_lhat_doL_scan_what_uF.eps')
+
+    def plot_fluxes_doL_scan(self):
+        # Only for what_uF = 1, lhat= 1
+        fig, ax = cosmoplots.figure_multiple_rows_columns(1,2)
+        good = lambda data, li, dj: data[:,:,li,dj][self.what_uF_good_ind[self.what_ind[0]][:,:,li,dj]]
+        C = lambda li, dj: self.C(self.what_ind[0],li,dj)
+
+        cosmoplots.change_log_axis_base(ax[0],'y')
+        cosmoplots.change_log_axis_base(ax[1],'y')
+        #plt.axhline(1,c='grey',ls=':')
+        for li in range(0,len(self.lhat)-1):
+            for dj in range(len(self.doL)):
+                ind = li + len(self.lhat)*dj
+                SF_int = self.doL[dj]*(1+self.lhat[li]**(-1))*self.W(self.what_ind[0],li,dj)*(1-np.exp(-1./self.doL[dj]))*(good(self.nuF,li,dj))
+                G1 = good(self.ndF*np.sqrt(self.TdF),li,dj)
+                QF_int = self.doL[dj]*(1-np.exp(-1./self.doL[dj]))*2.5*(1+self.lhat[li]**(-1))*self.W(self.what_ind[0],li,dj)*(self.xi_factor*C(li,dj)*good(self.nuF*self.TuF,li,dj))
+                qparF = self.ghat*self.xi_factor*C(li,dj)*good(self.ndF*self.TdF**1.5,li,dj)
+                qparN = self.ghat*self.xi_factor*C(li,dj)*good(self.ndN*self.TdN**1.5,li,dj)
+
+                ax[0].plot(C(li,dj), SF_int,color=cmap(ind), ls='-')
+                ax[0].plot(C(li,dj), G1,color=cmap(ind), ls='--')
+                ax[1].plot(C(li,dj), QF_int,color=cmap(ind), ls='-')
+                ax[1].plot(C(li,dj), qparF,color=cmap(ind), ls='--')
+                ax[1].plot(C(li,dj), qparN,color=cmap(ind), ls=':')
+
+        ax[0].set_xlabel(r'$\nu_{\mathrm{ref}}$')
+        ax[0].set_ylabel(r'$\Gamma_\mathrm{tot}$')
+        ax[0].set_xlim(self.coll[0],60)
+        lines = [mlines.Line2D([], [], color='k', ls = '-', label=r'$\int_0^1 S_{F}(x)\mathrm{d}x$'),
+                 #mlines.Line2D([], [], color=cmap(1), ls = '-', label=r'$\int_0^1 S_{N}(x)\mathrm{d}x$'),
+                 mlines.Line2D([], [], color='k', ls = '--', label=r'$n_\mathrm{d,F} \sqrt{T_\mathrm{d,F}}$')]
+        ax[0].legend(handles=lines)
+
+        ax[1].set_xlabel(r'$\nu_{\mathrm{ref}}$')
+        ax[1].set_ylabel(r'$q_{\mathrm{tot}}$')
+        ax[1].set_xlim(self.coll[0],60)
+        lines = [mlines.Line2D([], [], color='k', ls = '-', label=r'$\int_0^1 Q_{F}(x)\mathrm{d}x$'),
+                 mlines.Line2D([], [], color='k', ls = '--', label=r'$q_{\parallel,\mathrm{F}}(1)$'),
+                 mlines.Line2D([], [], color='k', ls = ':', label=r'$q_{\parallel,\mathrm{N}}(1)$')]
+        ax[1].legend(handles=lines,ncols=3,handlelength=1,handletextpad=0.5)
+        fig.savefig(saveloc+'fluxes_doL_scan_what_uF.eps')
+
 if __name__=="__main__":
     what_vals = [0.2, 1.]
     lhat_vals = [1., 2.]
     doL_vals = [0.1,0.2]
-    # Plot comparison figures
-    P = Plot(lhat_vals=lhat_vals, doL_vals=doL_vals)
-    P.find_what_uF_indices(what_vals=what_vals)
-    P.plot_good_params()
-    P.plot_near_SOL_compare()
-    P.plot_far_SOL_compare()
-    P.plot_nvt()
 
-    # Plot only lhat=1, dhat=0.2
-    Q = Plot(lhat_vals=lhat_vals[:1], doL_vals=doL_vals[-1:])
-    Q.find_what_uF_indices(what_vals=what_vals)
-    Q.plot_near_far_pressure()
-    Q.plot_coll()
-    Q.plot_fluxes()
+    R = Plot(lhat_vals=lhat_vals, doL_vals=doL_vals)
+    R.find_what_uF_indices(what_vals=what_vals[-1:])
+    R.plot_coll_lhat_doL_scan()
+    R.plot_fluxes_doL_scan()
+
+    if False:
+        # Plot comparison figures
+        P = Plot(lhat_vals=lhat_vals, doL_vals=doL_vals)
+        P.find_what_uF_indices(what_vals=what_vals)
+        P.plot_good_params()
+        P.plot_near_SOL_compare()
+        P.plot_far_SOL_compare()
+        P.plot_nvt()
+
+        # Plot only lhat=1, dhat=0.2
+        Q = Plot(lhat_vals=lhat_vals[:1], doL_vals=doL_vals[-1:])
+        Q.find_what_uF_indices(what_vals=what_vals)
+        Q.plot_near_far_pressure()
+        Q.plot_coll()
+        Q.plot_fluxes()
